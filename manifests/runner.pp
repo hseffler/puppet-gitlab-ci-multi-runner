@@ -254,7 +254,7 @@ define gitlab_ci_multi_runner::runner (
     }
 
     if $pre_build_script != undef {
-        $pre_build_script_opt = "--pre-build-script=${pre_build_script}"
+        $pre_build_script_opt = "--pre-build-script=\"${pre_build_script}\""
     }
 
     # I group like arguments together so my final opstring won't be so giant.
