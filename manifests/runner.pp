@@ -142,6 +142,8 @@ define gitlab_ci_multi_runner::runner (
     $env = undef,
     $executor = undef,
     $run_untagged = undef,
+    $output_limit = undef,
+    $pre_build_script = undef,
 
     ########################################################
     # Docker Options                                       #
@@ -247,9 +249,18 @@ define gitlab_ci_multi_runner::runner (
         }
     }
 
+    if $output_limit != undef {
+    {
+        $output_limit_opt = "--output-limit=${output_limit}"
+    }
+
+    if $pre_build_script != undef {
+    {
+        $pre_build_script_opt = "--pre-build-script=${pre_build_script}"
+    }
 
     # I group like arguments together so my final opstring won't be so giant.
-    $runner_opts = "${gitlab_ci_url_opt} ${node_description_opt} ${tags_opt} ${token_opt} ${env_opts} ${run_untagged_opt}"
+    $runner_opts = "${gitlab_ci_url_opt} ${node_description_opt} ${tags_opt} ${token_opt} ${env_opts} ${run_untagged_opt} ${output_limit_opt} ${pre_build_script_opt}"
 
     if $executor {
         $executor_opt = "--executor=${executor}"
