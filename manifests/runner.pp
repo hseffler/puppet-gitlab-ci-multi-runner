@@ -250,12 +250,10 @@ define gitlab_ci_multi_runner::runner (
     }
 
     if $output_limit != undef {
-    {
         $output_limit_opt = "--output-limit=${output_limit}"
     }
 
     if $pre_build_script != undef {
-    {
         $pre_build_script_opt = "--pre-build-script=${pre_build_script}"
     }
 
