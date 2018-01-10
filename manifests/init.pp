@@ -55,15 +55,6 @@ class gitlab_ci_multi_runner (
         fail("Target Operating system (${::operatingsystem}) not supported")
     }
 
-    # Get the file created by the "repo adding" step.
-    $repo_location = $package_type ? {
-        'rpm'   => "/etc/yum.repos.d/runner_${theName}.repo",
-        'deb'   => "/etc/apt/sources.list.d/runner_${theName}.list",
-        default => '/var',
-        # Choose a file that will definitely be there so that we don't have
-        # to worry about it running in the case of an unknown package_type.
-    }
-
     $service_file = $package_type ? {
         'rpm'   => $::operatingsystemrelease ? {
             /^(5.*|6.*)/ => '/etc/init.d/gitlab-ci-multi-runner',
@@ -87,7 +78,6 @@ class gitlab_ci_multi_runner (
         }
     } else {
         $theVersion = $version
-
     }
 
     if $version =~ /(latest|^10.+)/ {
@@ -95,6 +85,15 @@ class gitlab_ci_multi_runner (
     }
     else {
         $theName = "gitlab-ci-multi-runner"
+    }
+
+    # Get the file created by the "repo adding" step.
+    $repo_location = $package_type ? {
+        'rpm'   => "/etc/yum.repos.d/runner_${theName}.repo",
+        'deb'   => "/etc/apt/sources.list.d/runner_${theName}.list",
+        default => '/var',
+        # Choose a file that will definitely be there so that we don't have
+        # to worry about it running in the case of an unknown package_type.
     }
 
     $service = $theVersion ? {
