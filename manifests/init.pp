@@ -44,6 +44,7 @@ class gitlab_ci_multi_runner (
     $user = 'gitlab_ci_multi_runner',
     $version = 'latest'
 ) {
+
     $package_type = $::osfamily ? {
         'redhat' => 'rpm',
         'debian' => 'deb',
@@ -56,8 +57,8 @@ class gitlab_ci_multi_runner (
 
     # Get the file created by the "repo adding" step.
     $repo_location = $package_type ? {
-        'rpm'   => '/etc/yum.repos.d/runner_gitlab-ci-multi-runner.repo',
-        'deb'   => '/etc/apt/sources.list.d/runner_gitlab-ci-multi-runner.list',
+        'rpm'   => "/etc/yum.repos.d/runner_${theName}.repo",
+        'deb'   => "/etc/apt/sources.list.d/runner_${theName}.list",
         default => '/var',
         # Choose a file that will definitely be there so that we don't have
         # to worry about it running in the case of an unknown package_type.
@@ -89,6 +90,13 @@ class gitlab_ci_multi_runner (
 
     }
 
+    if $version =~ /(latest|^10.+)/ {
+        $theName = "gitlab-runner"
+    }
+    else {
+        $theName = "gitlab-ci-multi-runner"
+    }
+
     $service = $theVersion ? {
         '0.4.2-1' => 'gitlab-ci-multi-runner',
         default   => 'gitlab-runner',
@@ -109,7 +117,7 @@ class gitlab_ci_multi_runner (
 
     $toml_file = "${toml_path}/config.toml"
 
-    $repo_script = 'https://packages.gitlab.com/install/repositories/runner/gitlab-ci-multi-runner'
+    $repo_script = "https://packages.gitlab.com/install/repositories/runner/${theName}"
 
     if $env { Exec { environment => $env } }
 
@@ -130,7 +138,7 @@ class gitlab_ci_multi_runner (
         creates  => $repo_location,
     } ->
     # Install the package after the repo has been added.
-    package { 'gitlab-ci-multi-runner':
+    package { "${theName}":
         ensure => $theVersion,
     } ->
     exec { 'Uninstall Misconfigured Service':
@@ -164,9 +172,9 @@ class gitlab_ci_multi_runner (
             provider => shell,
             require  => Exec['Ensure Service'],
         }->
-        exec { 'Yum Exclude gitlab-ci-multi-runner':
-            command  => "sed -i 's/^exclude=.*$/& gitlab-ci-multi-runner/' /etc/yum.conf",
-            onlyif   => "! grep '^exclude=.*gitlab-ci-multi-runner' /etc/yum.conf",
+        exec { "Yum Exclude ${theName}":
+            command  => "sed -i 's/^exclude=.*$/& ${theName}/' /etc/yum.conf",
+            onlyif   => "! grep '^exclude=.*${theName}' /etc/yum.conf",
             user     => root,
             provider => shell,
         }
@@ -175,7 +183,7 @@ class gitlab_ci_multi_runner (
         if $nice =~ /^(-20|[-+]?1?[0-9])$/ {
             $path = '/bin:/usr/bin:/usr/sbin:/usr/local/sbin:/usr/local/bin:/sbin'
             case $service_file {
-                '/etc/init.d/gitlab-ci-multi-runner': {
+                "/etc/init.d/${theName}": {
                     $niceval = $nice ? {
                         /^[-+]/ => $nice,
                         default => "+${nice}"
