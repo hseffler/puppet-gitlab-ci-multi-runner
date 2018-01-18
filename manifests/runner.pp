@@ -426,7 +426,7 @@ define gitlab_ci_multi_runner::runner (
 
     $opts = "${runner_opts} ${executor_opt} ${docker_opts} ${parallels_vm_opt} ${ssh_opts} ${machine_opts} ${kubernetes_opts}"
     notify{"Will run gitlab-ci-multi-runner register --non-interactive ${opts}": }
-    notify{"! grep ${node_description} ${::gitlab_ci_multi_runner::toml_file}": }
+    notify{"! /bin/grep ${node_description} ${::gitlab_ci_multi_runner::toml_file}": }
 
     # Register a new runner - this is where the magic happens.
     # Only if the config.toml file doesn't already contain an entry.
@@ -435,8 +435,7 @@ define gitlab_ci_multi_runner::runner (
         command  => "gitlab-ci-multi-runner register --non-interactive ${opts}",
         user     => $user,
         provider => shell,
-
-        onlyif   => "! grep ${node_description} ${::gitlab_ci_multi_runner::toml_file}",
+        onlyif   => "! /bin/grep ${node_description} ${::gitlab_ci_multi_runner::toml_file}",
         cwd      => $::gitlab_ci_multi_runner::home_path,
         require  => $require,
     }
