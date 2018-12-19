@@ -80,12 +80,7 @@ class gitlab_ci_multi_runner (
         $theVersion = $version
     }
 
-    if $version =~ /(latest|^10.+)/ {
-        $theName = "gitlab-runner"
-    }
-    else {
-        $theName = "gitlab-ci-multi-runner"
-    }
+    $theName = "gitlab-runner"
 
     # Get the file created by the "repo adding" step.
     $repo_location = $package_type ? {
